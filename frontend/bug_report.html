@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeQuantum | Bug Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Google Sans', sans-serif; }
+        body { background-color: #f1f3f4; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        
+        .tracker-container {
+            background: #ffffff;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 40px;
+        }
+
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #ea4335; font-size: 28px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .header p { color: #5f6368; font-size: 14px; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 500; color: #202124; margin-bottom: 8px; font-size: 14px; }
+        
+        input[type="text"], input[type="datetime-local"], textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #dadce0;
+            border-radius: 12px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        input[type="text"]:focus, input[type="datetime-local"]:focus, textarea:focus {
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 2px rgba(26,115,232,0.2);
+        }
+
+        textarea { resize: vertical; min-height: 120px; }
+
+        .submit-btn {
+            background: #1a73e8;
+            color: #fff;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .submit-btn:hover { background: #1557b0; transform: translateY(-1px); }
+        .submit-btn:active { transform: translateY(0); }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .back-link:hover { text-decoration: underline; }
+
+        #successMsg {
+            display: none;
+            background: #e6f4ea;
+            color: #137333;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="tracker-container">
+        <div class="header">
+            <h1>🐛 Report an Issue</h1>
+            <p>Help us improve CodeQuantum by detailing the bug you faced.</p>
+        </div>
+
+        <div id="successMsg">✅ Bug successfully reported. Thank you!</div>
+
+        <form id="bugForm">
+            <div class="form-group">
+                <label for="bugTitle">Issue Title</label>
+                <input type="text" id="bugTitle" placeholder="e.g., Image generator stuck on loading" required>
+            </div>
+
+            <div class="form-group">
+                <label for="bugTime">Time Occurred</label>
+                <input type="datetime-local" id="bugTime" required>
+            </div>
+
+            <div class="form-group">
+                <label for="bugDesc">Problem Description & Steps to Reproduce</label>
+                <textarea id="bugDesc" placeholder="What exactly happened? What were you trying to do?" required></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">Submit Bug Report</button>
+        </form>
+
+        <a href="/chat.html" class="back-link">← Back to Chat</a>
+    </div>
+
+    <script>
+        // Auto-fill the current time so the user doesn't have to guess
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('bugTime').value = now.toISOString().slice(0,16);
+
+        // Handle the form submission
+        document.getElementById('bugForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('bugTitle').value;
+            const time = document.getElementById('bugTime').value;
+            const desc = document.getElementById('bugDesc').value;
+            const btn = document.getElementById('submitBtn');
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert("You must be logged in to report a bug.");
+                window.location.href = "index.html";
+                return;
+            }
+
+            btn.innerText = "Submitting...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/bugs', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        time_occurred: time,
+                        description: desc
+                    })
+                });
+
+                if (response.ok) {
+                    document.getElementById('bugForm').style.display = 'none';
+                    document.getElementById('successMsg').style.display = 'block';
+                } else {
+                    throw new Error("Failed to submit bug");
+                }
+            } catch (error) {
+                alert("Error submitting bug. Please try again.");
+                btn.innerText = "Submit Bug Report";
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

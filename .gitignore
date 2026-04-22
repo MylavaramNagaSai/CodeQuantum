@@ -1,0 +1,4 @@
+.env
+codequantum.db
+__pycache__/
+backend/main.py
