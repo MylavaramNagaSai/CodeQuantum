@@ -1,4 +1,5 @@
-const API_URL = "/api";
+const API_URL = "https://codequantum.tech/api";
+
 // --- OAUTH2 TOKEN CATCHER ---
 // If we just got redirected back from Google, grab the token and log in!
 const urlParams = new URLSearchParams(window.location.search);

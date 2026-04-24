@@ -1,5 +1,5 @@
 /* --- 🧠 CODEQUANTUM CORE ENGINE --- */
-const API_URL = "/api";
+const API_URL = "https://codequantum.tech/api";
 let currentThreadId = null;
 
 // DOM Selectors
